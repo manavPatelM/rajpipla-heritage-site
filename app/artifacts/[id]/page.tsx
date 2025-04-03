@@ -1,7 +1,7 @@
 "use client"
 
-import { JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
 import { ArrowLeft, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -9,25 +9,31 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Artifact } from "@/lib/models"
+import api from "@/lib/axios" // Axios instance
 
-export default function ArtifactDetailPage({ params }: { params: { id: string } }) {
+export default function ArtifactDetailPage() {
   const router = useRouter()
+  const { id } = useParams() // Get ID from dynamic route
   const [artifact, setArtifact] = useState<Artifact | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!id) return // Prevent fetching if ID is missing
+
     (async () => {
-      const response = await fetch("/api/artifacts")
-      const artifacts: Artifact[] = await response.json()
-      const foundArtifact: Artifact | undefined = artifacts.find((a: Artifact) => a._id === params.id)
-      if (foundArtifact) {
-        setArtifact(foundArtifact)
-      } else {
+      try {
+        const { data } = await api.get<{ data: Artifact }>(`/api/artifacts/${id}`)
+        setArtifact(data.data)
+      } catch (error) {
+        console.error("Error fetching artifact:", error)
         router.push("/")
+      } finally {
+        setLoading(false)
       }
     })()
-  }, [params.id, router])
+  }, [id, router])
 
-  if (!artifact) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-muted-foreground">Loading artifact details...</p>
@@ -35,19 +41,20 @@ export default function ArtifactDetailPage({ params }: { params: { id: string } 
     )
   }
 
+  if (!artifact) return null
+
   const handleDownloadPdf = () => {
-    // In a real application, this would download the PDF from the pdfGuideUrl
-    alert("Downloading PDF guide for " + artifact.name)
+    if (artifact.pdfGuideUrl) {
+      window.open(artifact.pdfGuideUrl, "_blank")
+    } else {
+      alert("No PDF guide available")
+    }
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto p-4 md:p-6">
-        <Button
-          variant="ghost"
-          className="mb-6 hover:bg-background hover:text-primary"
-          onClick={() => router.push("/")}
-        >
+        <Button variant="ghost" className="mb-6 hover:bg-background hover:text-primary" onClick={() => router.push("/")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Artifacts
         </Button>
@@ -56,7 +63,7 @@ export default function ArtifactDetailPage({ params }: { params: { id: string } 
           <div className="space-y-6">
             <div className="relative aspect-square overflow-hidden rounded-lg border border-border">
               <Image
-                src={artifact.highResImageUrl || "/placeholder.svg"}
+                src={artifact.imageUrl || "/placeholder.svg"}
                 alt={artifact.name}
                 fill
                 className="object-cover"
@@ -100,8 +107,8 @@ export default function ArtifactDetailPage({ params }: { params: { id: string } 
             <div>
               <h2 className="text-xl font-semibold mb-4">Story Points</h2>
               <div className="space-y-4">
-                {artifact.storyPoints.map((point: { title: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined; description: string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<string | number | bigint | boolean | ReactPortal | ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | null | undefined> | null | undefined }, index: Key | null | undefined) => (
-                  <Card key={index as string} className="border-border">
+                {artifact.storyPoints?.map((point, index) => (
+                  <Card key={index} className="border-border">
                     <CardContent className="p-4">
                       <h3 className="font-medium text-lg text-primary">{point.title}</h3>
                       <p className="text-muted-foreground mt-1">{point.description}</p>
@@ -122,5 +129,4 @@ export default function ArtifactDetailPage({ params }: { params: { id: string } 
       </div>
     </div>
   )
-}
-
+};

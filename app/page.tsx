@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Compass, Book, Users } from "lucide-react"
+import Image from "next/image"
 
 export default async function Home() {
 
@@ -8,16 +9,15 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section with Video Background */}
       <section className="relative h-[70vh] overflow-hidden">
-        <video
+        <Image
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/placeholder.svg?height=1080&width=1920"
-        >
-          <source src="/videos/palace-tour.mp4" type="video/mp4" />
-        </video>
+          src="https://res.cloudinary.com/dgti4pca9/image/upload/v1743334531/artifacts/kxley9uplkockyqyxvtp.jpg"
+          alt="Rajpipla Palace"
+          fill
+          priority
+        />
+
+
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">Discover Rajpipla Palace</h1>

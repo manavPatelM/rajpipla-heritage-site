@@ -69,17 +69,20 @@ api.interceptors.response.use(
       const errorMessage = error.response.data.error.message || "Something went wrong"
 
       // Show toast notification for API errors
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "Error",
+      //   description: errorMessage,
+      //   variant: "destructive",
+      // })
+
+      console.error("API Error:", errorMessage)
     } else if (error.message === "Network Error") {
-      toast({
-        title: "Network Error",
-        description: "Please check your internet connection and try again.",
-        variant: "destructive",
-      })
+      // toast({
+      //   title: "Network Error",
+      //   description: "Please check your internet connection and try again.",
+      //   variant: "destructive",
+      // })
+      console.error("Network Error:", error.message)
     }
 
     return Promise.reject(error)

@@ -10,17 +10,19 @@ export default async function AdminUsersPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const page = typeof searchParams.page === "string" ? Number.parseInt(searchParams.page) : 1
+  const serchParamsVal = await searchParams
+  const page = typeof serchParamsVal.page === "string" ? Number.parseInt(serchParamsVal.page) : 1
   const limit = 20
   const skip = (page - 1) * limit
 
   const db = await getDb()
 
   // Get users with pagination
-  const [users, total] = await Promise.all([
+  const [users , total] = await Promise.all([
     db.collection("users").find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).toArray(),
     db.collection("users").countDocuments({}),
   ])
+  // console.log("users", users);
 
   const totalPages = Math.ceil(total / limit)
 
@@ -45,8 +47,8 @@ export default async function AdminUsersPage({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user: any) => (
-              <TableRow key={user.id}>
+            {Object.values(users).map((user: any) => (
+              <TableRow key={user._id ?? Math.random()}>
                 <TableCell className="font-medium">
                   {user.firstName} {user.lastName}
                 </TableCell>
@@ -67,7 +69,7 @@ export default async function AdminUsersPage({
                 <TableCell>{format(new Date(user.createdAt), "MMM dd, yyyy")}</TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/admin/users/${user.id}`}>Edit</Link>
+                    <Link href={`/admin/users/${user._id}`}>Edit</Link>
                   </Button>
                 </TableCell>
               </TableRow>

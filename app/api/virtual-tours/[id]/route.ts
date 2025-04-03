@@ -6,7 +6,8 @@ import { ObjectId } from "mongodb"
 import VirtualTourModel from "@/models/VirtualTour"
 
 export const GET = asyncHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
-  const tour = await getVirtualTourById(params.id)
+  const { id } = params
+  const tour = await getVirtualTourById(id)
 
   if (!tour) {
     return errorResponse("Virtual tour not found", "NOT_FOUND", 404)
@@ -48,3 +49,30 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500 })
   }
 }
+
+const DELETE = asyncHandler(async (req: NextRequest, { params }: { params: { id: string } }) => {
+  const { id } = params
+
+  if (!id) {
+    return errorResponse("Tour ID is required", "BAD_REQUEST", 400)
+  }
+
+  if (!ObjectId.isValid(id)) {
+    return errorResponse("Invalid Tour ID", "BAD_REQUEST", 400)
+  }
+
+  try {
+    const deletedTour = await VirtualTourModel.findByIdAndDelete(id)
+
+    if (!deletedTour) {
+      return errorResponse("Virtual tour not found", "NOT_FOUND", 404)
+    }
+
+    return successResponse(deletedTour)
+  } catch (error) {
+    console.error("Delete virtual tour error:", error)
+    return errorResponse("An error occurred while deleting the virtual tour", "INTERNAL_SERVER_ERROR", 500)
+  }
+}
+)
+// export { GET, PUT, DELETE }

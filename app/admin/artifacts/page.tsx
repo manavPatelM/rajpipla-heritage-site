@@ -1,17 +1,29 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
-import { getArtifacts } from "@/lib/db-service"
 import ArtifactsTable from "./components/artifacts-table"
 import { Artifact } from "@/lib/models"
+import api from "@/lib/axios"
 
 export default async function AdminArtifactsPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const page = typeof searchParams.page === "string" ? Number.parseInt(searchParams.page) : 1
-  const { artifacts, pagination } = await getArtifacts({}, page, 10)
+  const serchParamsVal = await searchParams
+  const page = typeof serchParamsVal.page === "string" ? Number.parseInt(serchParamsVal.page) : 1
+  const response = await api.get("api/artifacts", {
+    params: {
+      page,
+      limit: 10,
+    },
+  })
+
+  const artifacts = response.data.data
+  const pagination = response.data.pagination
+  
+  // console.log("artifacts", response.data);
+  
 
   return (
     <div>

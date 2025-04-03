@@ -8,7 +8,6 @@ export interface Artifact {
   type: string
   significance: string
   imageUrl: string
-  highResImageUrl: string
   pdfGuideUrl?: string
   storyPoints: {
     title: string

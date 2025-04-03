@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server"
 import { asyncHandler, successResponse, errorResponse } from "@/lib/api-utils"
 import { getArtifacts, getArtifactById, createArtifact } from "@/lib/db-service"
-import { Schema } from "mongoose"
 
 export const GET = asyncHandler(async (req: NextRequest) => {
   const url = new URL(req.url)

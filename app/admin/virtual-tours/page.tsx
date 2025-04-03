@@ -1,121 +1,89 @@
-"use client"
+// "use client"
 
-import { useState, useEffect } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import AdminHeader from "@/app/virtual-tour/components/admin/admin-header"
-import ToursList from "@/app/virtual-tour/components/admin/tours-list"
-import TourEditor from "@/app/virtual-tour/components/admin/tour-editor"
-import HotspotEditor from "@/app/virtual-tour/components/admin/hotspot-editor"
-import type { IVirtualTour } from "@/models/VirtualTour"
-import { ImageUpload } from "@/components/image-upload"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Edit, Plus } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
+import DeleteTourButton from "@/components/delete-tour-button"
 import api from "@/lib/axios"
+// import { useState, useEffect } from "react"
+import { getDb } from "@/lib/db-service"
 
-export default function AdminPage() {
 
-  const [tours, setTours] = useState<IVirtualTour[]>([] as IVirtualTour[])
-  const [selectedTourId, setSelectedTourId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("tours")
+async function getTours() {
+  const db = await getDb()
+  const tours = await db.collection("virtualtours").find({}).toArray()
+  return tours
+}
 
-  // Fetch tours only once on mount
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const response = await api.get("/api/virtual-tours")
-        setTours(response.data)
-      } catch (error) {
-        console.error("Error fetching virtual tours:", error)
-      }
-    }
-    fetchTours()
-  }, []) // Empty dependency array ensures it runs once
+export default async function AdminPage() {
 
-  const selectedTour = selectedTourId ? tours.find((tour) => tour.id === selectedTourId) : null
+  // const [tours, setTours] = useState([])
 
-  const handleSaveTour = async (updatedTour: IVirtualTour) => {
-    setTours((prevTours) => prevTours.map((tour) => (tour.id === updatedTour.id ? updatedTour : tour)))
-    await api.put(`/api/virtual-tours/${updatedTour.id}`, updatedTour)
-  }
-
-  const handleAddTour = async (newTour: IVirtualTour) => {
-    setTours((prev) => (Array.isArray(prev) ? [...prev, newTour] : [newTour]));
-    await api.post("/api/virtual-tours", newTour);
-  };
-
-  const handleDeleteTour = async (tourId: string) => {
-    setTours((prevTours) => prevTours.filter((tour) => tour.id !== tourId))
-    await api.delete(`/api/virtual-tours/${tourId}`)
-  }
+  const tours = await getTours()
 
   return (
-    <div className="min-h-screen bg-muted/40">
-      <AdminHeader />
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Admin Panel</h1>
+        <Link href="/admin/virtual-tours/tour/new">
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add New Tour
+          </Button>
+        </Link>
+      </div>
 
-      <main className="container py-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Virtual Tour Admin</h1>
-          <p className="text-muted-foreground">Manage your virtual tours and hotspots</p>
+      {tours?.length === 0 ? (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-semibold mb-2">No tours available</h2>
+          <p className="text-muted-foreground mb-6">Create your first virtual tour to get started.</p>
+          <Link href="/admin/virtual-tours/tour/new">
+            <Button>Create Tour</Button>
+          </Link>
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="tours">Tours</TabsTrigger>
-            <TabsTrigger value="hotspots" disabled={!selectedTourId}>
-              Hotspots
-            </TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="tours" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-              <div className="md:col-span-1">
-                <ToursList
-                  tours={tours}
-                  selectedTourId={selectedTourId}
-                  onSelectTour={setSelectedTourId}
-                  onAddTour={handleAddTour}
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tours?.map((tour: any) => (
+            <Card key={tour._id}>
+              <div className="relative h-48 w-full">
+                <Image
+                  src={tour.panoramaUrl || "/placeholder.svg?height=200&width=400"}
+                  alt={tour.name}
+                  fill
+                  className="object-cover"
                 />
               </div>
-
-              <div className="md:col-span-2">
-                {selectedTour ? (
-                  <TourEditor
-                    tour={selectedTour}
-                    onSave={handleSaveTour}
-                    onDelete={handleDeleteTour}
-                    onEditHotspots={() => setActiveTab("hotspots")}
-                  />
-                ) : (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Tour Editor</CardTitle>
-                      <CardDescription>Select a tour from the list or create a new one to get started</CardDescription>
-                    </CardHeader>
-                  </Card>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="hotspots">
-            {selectedTour && <HotspotEditor tour={selectedTour} allTours={tours} onSave={handleSaveTour} />}
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <Card>
               <CardHeader>
-                <CardTitle>Analytics</CardTitle>
-                <CardDescription>View statistics about your virtual tours</CardDescription>
+                <CardTitle>{tour.name}</CardTitle>
+                <CardDescription>{tour.location}</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex h-[300px] items-center justify-center border border-dashed">
-                  <p className="text-muted-foreground">Analytics dashboard coming soon</p>
-                </div>
+                <p className="line-clamp-2">{tour.description}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {tour.hotspots.length} hotspot{tour.hotspots.length !== 1 ? "s" : ""}
+                </p>
               </CardContent>
+              <CardFooter className="flex justify-between">
+                <Link href={`/admin/virtual-tours/tour/${tour._id}`}>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Button>
+                </Link>
+                <Link href={`/admin/virtual-tours/tour/${tour._id}/hotspots`}>
+                  <Button variant="outline" size="sm">
+                    Manage Hotspots
+                  </Button>
+                </Link>
+                <DeleteTourButton id={tour?._id as string} />
+              </CardFooter>
             </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
+

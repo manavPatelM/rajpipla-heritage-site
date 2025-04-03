@@ -9,11 +9,12 @@ export default async function ArtifactsPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const page = typeof searchParams.page === "string" ? Number.parseInt(searchParams.page) : 1
-  const era = typeof searchParams.era === "string" ? searchParams.era : undefined
-  const type = typeof searchParams.type === "string" ? searchParams.type : undefined
-  const significance = typeof searchParams.significance === "string" ? searchParams.significance : undefined
-  const search = typeof searchParams.search === "string" ? searchParams.search : undefined
+  const serchParamsVal = await searchParams
+  const page = typeof serchParamsVal.page === "string" ? Number.parseInt(serchParamsVal.page) : 1
+  const era = typeof serchParamsVal.era === "string" ? serchParamsVal.era : undefined
+  const type = typeof serchParamsVal.type === "string" ? serchParamsVal.type : undefined
+  const significance = typeof serchParamsVal.significance === "string" ? serchParamsVal.significance : undefined
+  const search = typeof serchParamsVal.search === "string" ? serchParamsVal.search : undefined
 
   const { artifacts, pagination } = await getArtifacts({ era, type, significance, search }, page, 12)
 
@@ -79,7 +80,7 @@ export default async function ArtifactsPage({
                     href={{
                       pathname: "/artifacts",
                       query: {
-                        ...searchParams,
+                        ...serchParamsVal,
                         page: pageNum,
                       },
                     }}

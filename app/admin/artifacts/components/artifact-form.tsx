@@ -51,7 +51,6 @@ export default function ArtifactForm({ artifact }: { artifact?: Artifact }) {
       type: "",
       significance: "",
       imageUrl: "",
-      highResImageUrl: "",
       pdfGuideUrl: "",
       storyPoints: [{ title: "", description: "" }],
     },
@@ -80,10 +79,6 @@ export default function ArtifactForm({ artifact }: { artifact?: Artifact }) {
 
   const handleImageUploaded = (url: string) => {
     setFormData((prev) => ({ ...prev, imageUrl: url }))
-  }
-
-  const handleHighResImageUploaded = (url: string) => {
-    setFormData((prev) => ({ ...prev, highResImageUrl: url }))
   }
 
   const handlePdfUploaded = (url: string) => {
@@ -222,13 +217,6 @@ export default function ArtifactForm({ artifact }: { artifact?: Artifact }) {
             defaultImage={formData.imageUrl}
             label="Artifact Image"
             folder="artifacts"
-          />
-
-          <ImageUpload
-            onImageUploaded={handleHighResImageUploaded}
-            defaultImage={formData.highResImageUrl}
-            label="High-Resolution Image"
-            folder="artifacts/high-res"
           />
 
           <div className="space-y-2">

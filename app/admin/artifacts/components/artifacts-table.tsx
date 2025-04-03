@@ -87,7 +87,7 @@ export default function ArtifactsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {artifacts.map((artifact) => (
+            {artifacts?.map((artifact) => (
               <TableRow key={artifact._id}>
                 <TableCell>
                   <div className="h-10 w-10 rounded-md overflow-hidden">

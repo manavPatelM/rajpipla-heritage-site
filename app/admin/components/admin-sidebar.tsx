@@ -7,14 +7,16 @@ import { LayoutDashboard, Archive, Users, Calendar, Compass, Store, Settings, Us
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Artifacts", href: "/admin/artifacts", icon: Archive },
-  { name: "Guides", href: "/admin/guides", icon: Users },
-  { name: "Bookings", href: "/admin/bookings", icon: Calendar },
+  // { name: "Bookings", href: "/admin/bookings", icon: Calendar },
   { name: "Virtual Tours", href: "/admin/virtual-tours", icon: Compass },
   { name: "Users", href: "/admin/users", icon: UserCog },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
 ]
 
 export default function AdminSidebar() {
+
+  
+  
+  
   const pathname = usePathname()
 
   return (
@@ -51,7 +53,7 @@ export default function AdminSidebar() {
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-full bg-muted" />
             <div className="ml-3">
-              <p className="text-sm font-medium">Admin User</p>
+              <p className="text-sm font-medium">Admin user</p>
               <p className="text-xs text-muted-foreground">admin@rajpipla.com</p>
             </div>
           </div>
